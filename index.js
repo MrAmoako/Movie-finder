@@ -7,10 +7,11 @@ async function getMovie(query) {
    try {
       error.textContent = '';
       const res = await fetch(`https://www.omdbapi.com/?apikey=fc24732d&s=${query}`);
-      if(!res.ok) {
-         throw new Error('Movie Not Found')
-      }
+   
       const movies = await res.json();
+      if (movies.Response === "False") {
+       throw new Error(movies.Error);
+      }
       return movies; 
    } catch(err){
      error.textContent = err.message;
@@ -18,14 +19,33 @@ async function getMovie(query) {
 }
 
 function displayMovies(movies) {
-  for (let i = 0; i < movies.length; i++) {
-    placeholder.innerHTML = '';
+     placeholder.innerHTML = '';
+  for (let i = 0; i < movies.Search.length; i++) {
+
+   const movie = movies.Search[i];
+  
+    const list = document.createElement('li')
     const img = document.createElement('img');
-    const title = document.createElement('li');
-    const year = document.createElement('li')
-    img.src = movies.search.poster;
-    title.innerText = movies.search.Title;
-    year.innerText = movies.search.Year;
-   
+    const title = document.createElement('p');
+    const year = document.createElement('p')
+    img.src = movie.Poster;
+    title.innerText = movie.Title;
+    year.innerText = movie.Year;
+    list.appendChild(img);
+    list.appendChild(title);
+    list.appendChild(year);
+    placeholder.appendChild(list);
   }
 }
+
+button.addEventListener('click', async() => {
+   const query = input.value.toLowerCase();
+   if(!query) {
+      error.innerText = 'Enter A Movie';
+      return;
+   }
+  const movies = await getMovie(query);
+  if(movies) {
+   displayMovies(movies)
+  }
+})
